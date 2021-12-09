@@ -1,6 +1,6 @@
 from typing import Union
 
-#
+
 class Object:
 
     def __init__(self):
