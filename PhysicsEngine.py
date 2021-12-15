@@ -17,6 +17,7 @@ class RigidBody(Component):
         self.velocity = Velocity()
 
     def on_collison(self,):
+        pass
 
     def tick(self, fps):
         self.velocity.line_velocity.y -= g / fps
