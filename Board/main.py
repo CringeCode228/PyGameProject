@@ -51,7 +51,7 @@ class GameField(Board):
         self.inventory = GameFieldInventory(10)
         for i in range(width):
             for j in range(height):
-                self.board[i][j] = GameObject(self, i, j)
+                self.board[i][j] = GameObject(self, i, j, None)
 
     def render(self, screen: pygame.Surface):
         super(GameField, self).render(screen)
@@ -62,7 +62,8 @@ class GameField(Board):
 
     def on_click(self, cell_coords):
         if type(self.board[cell_coords[0]][cell_coords[1]]) != Player:
-            self.board[cell_coords[0]][cell_coords[1]] = self.inventory.board[self.inventory.active_cell][0]
+            self.board[cell_coords[0]][cell_coords[1]] = GameObject(self, cell_coords[0], cell_coords[1],
+                                                                    "textures/bricks.png", True)
 
 
 class GameFieldInventory(Board):
@@ -82,23 +83,33 @@ class GameFieldInventory(Board):
 
 class GameObject:
 
-    def __init__(self, board: GameField, x: int, y: int, collide=False, texture=pygame.Surface((16, 16))):
+    def __init__(self, board: Board, x: int, y: int, texture: str, collide=False):
         self.x = x
         self.y = y
         self.game_field = board
         self.collide = collide
-        self.texture = texture
+        if texture:
+            self.texture = pygame.image.load(texture)
+            self.texture = pygame.transform.scale(self.texture, (self.game_field.cell_size - 2,
+                                                                 self.game_field.cell_size - 2))
+        else:
+            self.texture = pygame.Surface((self.game_field.cell_size - 2, self.game_field.cell_size - 2))
+        self.game_field.board[x][y] = self
 
     def render(self, screen):
-        self.texture.blit(screen, (self.game_field.left + self.x * self.game_field.cell_size,
-                                   self.game_field.top + self.y * self.game_field.cell_size))
+        screen.blit(self.texture, (self.game_field.left + self.x * self.game_field.cell_size + 1,
+                                   self.game_field.top + self.y * self.game_field.cell_size + 1))
+
+    def set_coords(self, x, y):
+        self.x = x
+        self.y = y
+        self.game_field.board[x][y] = self
 
 
 class Player(GameObject):
 
     def __init__(self, x: int, y: int, board: GameField, texture: str):
-        super(Player, self).__init__(board, x, y)
-        self.texture = pygame.image.load(texture)
+        super(Player, self).__init__(board, x, y, texture)
         self.rotate = 0
 
     def move(self, direction: int):
@@ -125,8 +136,7 @@ class Player(GameObject):
 class Block(GameObject):
 
     def __init__(self, x, y, board, texture: str):
-        super(Block, self).__init__(board, x, y, True)
-        self.texture = pygame.image.load(texture)
+        super(Block, self).__init__(board, x, y, texture, True)
 
 
 pygame.init()
@@ -139,22 +149,20 @@ FPS = 60
 
 
 game_field = GameField(25, 25)
-game_field.set_view(10, 10, 16)
-game_field.inventory.set_view(10, 16 * 25 + 20, 16)
+game_field.set_view(10, 10, 32)
+game_field.inventory.set_view(10, 32 * 25 + 20, 32)
 player = Player(12, 12, game_field, "textures/player.png")
-game_field.inventory.board[0][0] = Block(1, 1, game_field, "textures/bricks.png")
+game_field.inventory.board[0][0] = Block(0, 0, game_field.inventory, "textures/bricks.png")
 
 running = True
-pause = True
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if pause:
-                if event.button == 1:
-                    pass
+            if event.button == 1:
+                game_field.get_click(event.pos)
         elif event.type == pygame.KEYUP:
             if event.key == 32:
                 pause = not pause
@@ -163,6 +171,7 @@ while running:
                 else:
                     FPS = 10
     screen.fill((0, 0, 0))
+
     game_field.render(screen)
     pygame.display.flip()
     clock.tick(FPS)
