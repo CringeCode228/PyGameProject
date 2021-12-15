@@ -3,7 +3,11 @@ import pygame
 import GameEngine
 
 pygame.init()
-screen = pygame.display.set_mode((pygame.display.Info().current_w, pygame.display.Info().current_h), pygame.FULLSCREEN)
+display_info = pygame.display.Info()
+screen = pygame.display.set_mode((display_info.current_w, display_info.current_h), pygame.FULLSCREEN)
+
+scale_coefficient = GameEngine.Vector2(display_info.current_w, display_info.current_h)
+
 pygame.display.set_caption("Example")
 
 pygame.display.flip()

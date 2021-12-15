@@ -1,9 +1,11 @@
 from GameEngine import *
 from math import pi
 
+g = 9.81
+
 
 class OnCollision(Event):
-    
+
     def __init__(self):
         super(OnCollision, self).__init__()
 
@@ -14,7 +16,10 @@ class RigidBody(Component):
         super(RigidBody, self).__init__(obj, "RigidBody")
         self.velocity = Velocity()
 
+    def on_collison(self,):
+
     def tick(self, fps):
+        self.velocity.line_velocity.y -= g / fps
         self.obj.transform.position.x += self.velocity.line_velocity.x / fps
         self.obj.transform.position.y += self.velocity.line_velocity.y / fps
         self.obj.transform.rotation.x += self.velocity.angular_velocity.x / fps

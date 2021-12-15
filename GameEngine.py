@@ -1,19 +1,25 @@
-from typing import Union
+from typing import Union, Iterable
 
 
 class Scene:
 
-    def __init__(self, *objects):
-        self.objects = []
+    def __init__(self, screen, *objects):
+        self.screen = screen
+        self.objects: Iterable[Object] = []
 
     def render(self):
         for obj in sorted(self.objects, key=lambda key: obj.z_sorting):
             obj.render()
 
+    def tick(self, fps):
+        for obj in self.objects:
+            obj.tick()
+
 
 class Object:
 
-    def __init__(self, z_sorting=0):
+    def __init__(self, scene: Scene, z_sorting=0):
+        self.scene = scene
         self.transform = Transform()
         self.parent = None
         self.z_sorting = z_sorting
@@ -23,7 +29,7 @@ class Object:
         for component in self.components:
             component.tick()
 
-    def render(self, screen):
+    def render(self):
         pass
 
     def add_component(self, component):
