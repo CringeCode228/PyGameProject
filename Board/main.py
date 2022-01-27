@@ -120,7 +120,9 @@ class List(UIElement):
 
 
 class Level:
-    pass
+
+    def __init__(self):
+        self.objects = []
 
 
 class Scene:
@@ -317,13 +319,14 @@ class GameObject(pygame.sprite.Sprite):
         self.y = y
         self.game_field.board[x][y] = self
 
-    def get_id(self):
+    @staticmethod
+    def get_id():
         return -1
 
     def serialize(self):
         pass
 
-    def deserialize(self, data):
+    def deserialize(self):
         pass
 
 
@@ -353,13 +356,18 @@ class Player(GameObject, pygame.sprite.Sprite):
             if not self.game_field.board[self.x][self.y + 1].collide:
                 self.y += 1
 
+    @staticmethod
+    def get_id():
+        return 1
+
 
 class Block(GameObject):
 
     def __init__(self, x, y, board, texture: str):
         super(Block, self).__init__(board, x, y, texture, True)
 
-    def get_id(self):
+    @staticmethod
+    def get_id():
         return 0
 
     def serialize(self):
@@ -368,6 +376,9 @@ class Block(GameObject):
     def deserialize(self, data):
         pass
         # return Block(data["pos"][0], data["pos"][1])
+
+
+
 
 
 # pygame.init()
