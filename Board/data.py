@@ -29,10 +29,16 @@ class DataBase:
         return cur.fetchall()
 
     @staticmethod
-    def set_level(self, name, player_id, data):
+    def set_level(name, player_id, data):
         with sqlite3.connect("data.db") as conn:
             cur = conn.cursor()
             cur.execute(f"INSERT INTO Levels (Name, Player, Data) VALUES ({name}, {player_id}, {data})")
+
+    @staticmethod
+    def set_player(name, password):
+        with sqlite3.connect("data.db") as conn:
+            cur = conn.cursor()
+            cur.execute(f"INSERT INTO Levels (Name, Password) VALUES ({name}, {password})")
 
 
 class JSONUtility:

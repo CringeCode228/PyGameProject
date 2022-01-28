@@ -13,7 +13,8 @@ class Game:
         self.screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
         menu = Menu(self)
         editor = Editor(self)
-        self.scenes = [menu, editor]
+        levels = Levels(self)
+        self.scenes = [menu, editor, levels]
         self.start()
 
     def stop(self):
@@ -100,6 +101,7 @@ class Button(UIElement):
         self.pos1 = pos1
         self.pos2 = pos2
         self.color = color
+        self.rect = pygame.Rect(pos1, (pos2[0] - pos1[0], pos2[1] - pos1[1]))
 
     def draw(self):
         pygame.draw.rect(self.controller.screen, self.color, pygame.Rect(self.pos1[0], self.pos1[1],
@@ -109,7 +111,7 @@ class Button(UIElement):
         self.controller.screen.blit(font.render(self.text, True, pygame.Color(0, 0, 0)), self.pos1)
 
     def get_click(self, pos):
-        if (self.pos1[0] <= pos[0] <= self.pos2[0]) and (self.pos1[1] <= pos[1] <= self.pos2[1]):
+        if self.rect.collidepoint(pos):
             self.function()
 
 
@@ -117,6 +119,44 @@ class List(UIElement):
 
     def __init__(self, controller, pos1, pos2, color):
         super(List, self).__init__(controller)
+        self.elements = [ListElement(self, "Test"), ListElement(self, "Test2"), ListElement(self, "Test3")]
+        self.pos1 = pos1
+        self.pos2 = pos2
+        self.color = color
+        self.current_page = 0
+        self.rect = pygame.Rect(pos1, (pos2[0] - pos1[0], pos2[1] - pos1[1]))
+
+    def previous_page(self):
+        self.current_page -= 1
+
+    def next_page(self):
+        self.current_page += 1
+
+    def draw(self):
+        pygame.draw.rect(self.controller.screen, self.color, self.rect, 1)
+        for i in range(10):
+            try:
+                font = pygame.font.SysFont("Arial", self.rect.height // 10)
+                self.controller.screen.blit(font.render(self.elements[self.current_page * 10 + i].text, True,
+                                                        self.color),
+                                                        (self.pos1[0] + 5, self.pos1[1] + i * self.rect.height // 10))
+                pygame.draw.line(self.controller.screen, self.color, (self.pos1[0],
+                                                                      self.pos1[1] + self.rect.height // 10 * (i + 1)),
+                                 (self.pos1[0] + self.rect.width - 1, self.pos1[1] + self.rect.height // 10 * (i + 1)))
+            except IndexError:
+                pass
+
+    def get_click(self, pos):
+        if self.rect.collidepoint(pos):
+            pass
+
+
+class ListElement(UIElement):
+
+    def __init__(self, list, text, function=lambda: None):
+        super(ListElement, self).__init__(list.controller)
+        self.text = text
+        self.function = function
 
 
 class Level:
@@ -159,6 +199,9 @@ class Menu(Scene):
         button_quit = Button(self.ui_controller, "Выход", lambda: self.game.stop(),
                              (x // 2 - 50, y // 2 + 10),
                              (x // 2 + 50, y // 2 + 60), pygame.Color(255, 255, 255))
+        button_levels = Button(self.ui_controller, "Уровни", lambda: self.game.set_scene(2),
+                               (x // 2 - 50, y // 2 + 70),
+                               (x // 2 + 50, y // 2 + 120), pygame.Color(255, 255, 255))
 
     def update(self):
         self.ui_controller.update()
@@ -210,6 +253,26 @@ class Editor(Scene):
             self.ui_controller.get_click(pos)
             self.board.get_click(pos)
             self.inventory.get_click(pos)
+
+
+class Levels(Scene):
+
+    def __init__(self, game):
+        super(Levels, self).__init__(game)
+        x = self.game.screen.get_width()
+        y = self.game.screen.get_height()
+        self.ui_controller = UIController(self.game.screen)
+        button_quit = Button(self.ui_controller, "Назад", lambda: self.game.set_scene(0),
+                             (x - 100, 10),
+                             (x - 10, 60), pygame.Color(255, 255, 255))
+        list_levels = List(self.ui_controller, (100, 100), (x - 100, y - 100), pygame.Color(255, 255, 255))
+
+    def update(self):
+        self.ui_controller.update()
+
+    def get_mouse_down(self, key, pos):
+        if key == 1:
+            self.ui_controller.get_click(pos)
 
 
 class Board:
