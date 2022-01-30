@@ -3,7 +3,7 @@ import pygame
 
 class Board:
     # создание поля
-    def __init__(self, screen, width, height):
+    def __init__(self, screen: pygame.Surface, width, height):
         self.width = width
         self.height = height
         self.board = [[0] * width for _ in range(height)]
@@ -46,13 +46,20 @@ class Board:
 
 class GameField(Board):
 
-    def __init__(self, screen, width, height):
+    def __init__(self, screen, width, height, inventory):
         super(GameField, self).__init__(screen, width, height)
+        self.inventory = inventory
         # for i in range(width):
         #     for j in range(height):
         #         self.board[i][j] = GameObject(self, i, j, None)
+        self.fon = pygame.image.load("textures\\stone.png")
+        self.fon = pygame.transform.scale(self.fon, (self.cell_size, self.cell_size))
 
     def render(self):
+        for i in range(self.width):
+            for j in range(self.height):
+                self.screen.blit(self.fon, (self.left + self.cell_size * i, self.top + self.cell_size * j))
+        self.screen.blit(self.fon, (self.left, self.top))
         super(GameField, self).render()
 
         # super(GameField, self).render(self.screen)
@@ -62,10 +69,15 @@ class GameField(Board):
         # self.inventory.render(self.screen)
 
     def on_click(self, cell_coords):
-        pass
+        self.board[cell_coords[0]][cell_coords[1]] = self.inventory.board[self.inventory.active_cell].clone()
+
         # if type(self.board[cell_coords[0]][cell_coords[1]]) != Player:
         #     self.board[cell_coords[0]][cell_coords[1]] = GameObject(self, cell_coords[0], cell_coords[1],
         #                                                             "textures/bricks.png", True)
+
+    def set_view(self, left, top, cell_size):
+        super(GameField, self).set_view(left, top, cell_size)
+        self.fon = pygame.transform.scale(self.fon, (self.cell_size, self.cell_size))
 
 
 class GameFieldInventory(Board):

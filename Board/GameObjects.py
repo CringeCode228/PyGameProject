@@ -5,19 +5,21 @@ import json
 
 class GameObject(pygame.sprite.Sprite):
 
-    def __init__(self, board: Board, x: int, y: int, texture: str, collide=False):
-        super(GameObject, self).__init__(self)
-        self.x = x
-        self.y = y
+    def __init__(self, board, texture: str, collide=False):
+        super(GameObject, self).__init__()
+        self.x = -1
+        self.y = -1
         self.game_field = board
         self.collide = collide
-        if texture:
-            self.texture = pygame.image.load(texture)
-            self.texture = pygame.transform.scale(self.texture, (self.game_field.cell_size - 2,
-                                                                 self.game_field.cell_size - 2))
-        else:
-            self.texture = pygame.Surface((self.game_field.cell_size - 2, self.game_field.cell_size - 2))
-        self.game_field.board[x][y] = self
+        self.image = pygame.transform.scale(pygame.image.load(texture), (self.game_field.cell_size,
+                                                                         self.game_field.cell_size))
+        # if texture:
+        #     self.texture = pygame.image.load(texture)
+        #     self.texture = pygame.transform.scale(self.texture, (self.game_field.cell_size - 2,
+        #                                                          self.game_field.cell_size - 2))
+        # else:
+        #     self.texture = pygame.Surface((self.game_field.cell_size - 2, self.game_field.cell_size - 2))
+        # self.game_field.board[x][y] = self
 
     def render(self, screen):
         screen.blit(self.texture, (self.game_field.left + self.x * self.game_field.cell_size + 1,
@@ -38,11 +40,14 @@ class GameObject(pygame.sprite.Sprite):
     def deserialize(self):
         pass
 
+    def clone(self, board):
+        pass
+
 
 class Player(GameObject, pygame.sprite.Sprite):
 
-    def __init__(self, x: int, y: int, board: GameField, texture: str):
-        super(Player, self).__init__(board, x, y, texture)
+    def __init__(self, board: GameField, texture: str):
+        super(Player, self).__init__(board, texture)
         self.rotate = 0
 
     def move(self, direction: int):
@@ -72,8 +77,8 @@ class Player(GameObject, pygame.sprite.Sprite):
 
 class Block(GameObject):
 
-    def __init__(self, x, y, board, texture: str):
-        super(Block, self).__init__(board, x, y, texture, True)
+    def __init__(self, texture: str):
+        super(Block, self).__init__(texture, True)
 
     @staticmethod
     def get_id():
@@ -82,6 +87,9 @@ class Block(GameObject):
     def serialize(self):
         return json.dumps({"id": self.get_id(), "pos": [self.x, self.y], "texture": self.texture})
 
-    def deserialize(self, data):
-        pass
+    def clone(self, board):
+        return Block(self.texture)
+
+    # def deserialize(self, data):
+        # pass
         # return Block(data["pos"][0], data["pos"][1])

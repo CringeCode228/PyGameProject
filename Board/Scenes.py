@@ -1,6 +1,7 @@
 import pygame
 from UI import *
 from Boards import *
+from GameObjects import *
 
 
 class Scene:
@@ -65,10 +66,11 @@ class Editor(Scene):
         button_play = Button(self.ui_controller, "Играть", lambda: self.is_playing != self.is_playing,
                              (x - 100, 10),
                              (x - 10, 50), pygame.Color(255, 255, 255))
-        self.board = GameField(self.game.screen, 10, 10)
-        self.board.set_view(10, 10, 50)
         self.inventory = GameFieldInventory(self.game.screen, 10)
         self.inventory.set_view(10, 50 * 11 + 10, 50)
+        self.board = GameField(self.game.screen, 10, 10, self.inventory)
+        self.board.set_view(10, 10, 50)
+        self.inventory.board[0] = None
 
     def restart(self):
         self.is_playing = False
@@ -105,7 +107,8 @@ class Levels(Scene):
                              (x - 10, 60), pygame.Color(255, 255, 255))
         list_levels = List(self.ui_controller, (100, 100), (x - 100, y - 100), pygame.Color(255, 255, 255))
         list_levels.elements.extend([ListElement(list_levels, "Test", lambda: print("1")),
-                                     ListElement(list_levels, "Test2", lambda: print("2"))])
+                                     ListElement(list_levels, "Test2", lambda: print("2")),
+                                     ListElement(list_levels, "Устнове собеседование", lambda: print("3"))])
         button_previous = Button(self.ui_controller, "Предыдущая страница", lambda: list_levels.previous_page(),
                                  (10, y - 60),
                                  (250, y - 10), pygame.Color(255, 255, 255))
