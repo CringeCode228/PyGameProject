@@ -66,11 +66,13 @@ class Editor(Scene):
         button_play = Button(self.ui_controller, "Играть", lambda: self.is_playing != self.is_playing,
                              (x - 100, 10),
                              (x - 10, 50), pygame.Color(255, 255, 255))
-        self.inventory = GameFieldInventory(self.game.screen, 10)
+        self.inventory = GameFieldInventory(self.game.screen, 3)
         self.inventory.set_view(10, 50 * 11 + 10, 50)
         self.board = GameField(self.game.screen, 10, 10, self.inventory)
         self.board.set_view(10, 10, 50)
-        self.inventory.board[0] = None
+        Block(0, 0, self.inventory, "textures\\bricks.png")
+        Block(1, 0, self.inventory, "textures\\wood.png")
+        Block(2, 0, self.inventory, "textures\\grass.png")
 
     def restart(self):
         self.is_playing = False
@@ -91,8 +93,10 @@ class Editor(Scene):
     def get_mouse_down(self, key, pos):
         if key == 1:
             self.ui_controller.get_click(pos)
-            self.board.get_click(pos)
-            self.inventory.get_click(pos)
+            self.board.get_click(pos, key)
+            self.inventory.get_click(pos, key)
+        elif key == 3:
+            self.board.get_click(pos, key)
 
 
 class Levels(Scene):
